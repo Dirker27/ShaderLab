@@ -1,13 +1,14 @@
-﻿Shader "Custom/BasicDiffuseLit" {
+﻿// A Diffuse Shader with a Custom Lighting Model
+//
+//
+Shader "DSV_Shader_Lab/BasicDiffuseLit" {
 	
 	// Publicly Settable Fields
 	Properties {
-		// Emissive Color == ???
+		// Emissive Color == Color of light reflected off the object. (Lit surface)
 		_EmissiveColor ("Emissive Color", Color) = (1, 1, 1, 1)
-		// Ambient Color == ???
+		// Ambient Color == Color of unlit surface
 		_AmbientColor ("Ambient Color", Color) = (0, 0, 0, 0)
-		// Color Saturation Factor
-		_Factor ("Factor", Range(0.0001, 1)) = 0.5
 	}
 	
 	// Shader Program
@@ -16,8 +17,18 @@
 		LOD 200
 		
 		CGPROGRAM
+		// Use surface model 'surf', lighting model 'BasicDiffuse'
 		#pragma surface surf BasicDiffuse
 		
+		float4 _EmissiveColor;
+		float4 _AmbientColor;
+		
+		struct Input {
+			float2 uv_MainTex;
+		};
+		
+		//--- Lighting Model -------------------------------=
+		//
 		inline float4 LightingBasicDiffuse (SurfaceOutput s, fixed3 lightDir, fixed atten) {
 			float difLight = max(0, dot(s.Normal, lightDir));
 			float4 col;
@@ -25,17 +36,18 @@
 			col.a = s.Alpha;
 			return col;
 		}
+		// Alternate Lighting Model Signatures
+		//
+		// half4 Lighting<Name> (SurfaceOutput s, half3 lightDir, half atten) {}
+		// half4 Lighting<Name> (SurfaceOutput s, half3 lightDir, half3 viewDir, half atten) {}
+		// half4 Lighting<Name>_PrePass (SurfaceOutput s, half 4 light) {}
 		
-		// Apply color mix to surface
-		float4 _EmissiveColor;
-		float4 _AmbientColor;
-		float _Factor;
-		struct Input {
-			float2 uv_MainTex;
-		};
+		
+		//--- Surface Model --------------------------------=
+		//
 		void surf (Input IN, inout SurfaceOutput o) {
 			float4 c;
-			c = pow((_EmissiveColor + _AmbientColor), _Factor);
+			c = (_EmissiveColor + _AmbientColor);
 			
 			o.Albedo = c.rgb;
 			o.Alpha = c.a;

@@ -1,16 +1,17 @@
-﻿Shader "Custom/BasicDiffuse" {
+﻿// A Basic Diffuse Shader
+// 
+// Applies a publicly settable color balance to a surface
+// 
+Shader "DSV_Shader_Lab/BasicDiffuse" {
 	
 	// Publicly Settable Fields
 	Properties {
-		// Emissive Color == ???
+		// Emissive Color == Color of light reflected off the object. (Lit surface)
 		_EmissiveColor ("Emissive Color", Color) = (1, 1, 1, 1)
-		// Ambient Color == ???
+		// Ambient Color == Color of unlit surface
 		_AmbientColor ("Ambient Color", Color) = (0, 0, 0, 0)
-		// Color Saturation Factor
-		_Factor ("Factor", Range(0.001, 10)) = 0.5
-		
-		// Default Base Texture (Unused)
-		//_MainTex ("Base (RGB)", 2D) = "white" {}
+		// How Emissive the surface is
+		_InverseLux ("Lux", Range(1, 99)) = 25
 		
 		// --- PROPERTY TYPES -----------------------------=
 		//
@@ -33,7 +34,7 @@
 		// Bind to Public Properties by name
 		float4 _EmissiveColor;
 		float4 _AmbientColor;
-		float _Factor;
+		float _InverseLux;
 		
 		struct Input
 		{
@@ -44,28 +45,13 @@
 		void surf (Input IN, inout SurfaceOutput o)
 		{
 			float4 c;
-			c = pow((_EmissiveColor + _AmbientColor), _Factor);
+			c = pow((_EmissiveColor + _AmbientColor), 100 - _InverseLux);
 			
 			o.Albedo = c.rgb;
 			o.Alpha = c.a;
 		}
 		
 		ENDCG
-		
-		// Default Texture Mapper (Unused) ----------------=
-		//
-		//CGPROGRAM
-		//#pragma surface surf Lambert
-		//sampler2D _MainTex;
-		//struct Input {
-		//	float2 uv_MainTex;
-		//};
-		//void surf (Input IN, inout SurfaceOutput o) {
-		//	half4 c = tex2D (_MainTex, IN.uv_MainTex);
-		//	o.Albedo = c.rgb;
-		//	o.Alpha = c.a;
-		//}
-		//ENDCG
 	} 
 	FallBack "Diffuse"
 }
